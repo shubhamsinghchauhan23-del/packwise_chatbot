@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PackWise AI – Smart Packaging Assistant</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; margin:0; padding:0; }
+    .header {
+      background: linear-gradient(90deg, #2a9d8f, #264653);
+      color: white; text-align: center; padding: 20px;
+    }
+    .tagline { font-size: 18px; opacity: 0.9; }
+    .container { display: flex; height: calc(100vh - 100px); }
+    .chat-area {
+      flex: 1; display: flex; flex-direction: column;
+      padding: 20px; background: #fff; border-right: 1px solid #ddd;
+    }
+    .messages { flex: 1; overflow-y: auto; border-radius: 8px; padding: 10px; background: #fafafa; }
+    .message { margin: 10px 0; padding: 10px; border-radius: 8px; max-width: 80%; }
+    .message.user { background: #d1e7dd; margin-left:auto; text-align:right; }
+    .message.bot { background: #e9ecef; text-align:left; }
+    .input-area { display:flex; gap:10px; margin-top:10px; }
+    .input-area input { flex:1; padding:10px; border:1px solid #ccc; border-radius:4px; }
+    .input-area button { padding:10px 20px; background:#2a9d8f; color:white; border:none; border-radius:4px; cursor:pointer; }
+    .panel { width:320px; background:#fefefe; padding:20px; display:flex; flex-direction:column; }
+    .plan-toggle { background:#264653; color:white; border:none; padding:10px; border-radius:6px; cursor:pointer; }
+    .steps { display:none; margin-top:15px; }
+    .steps ol { padding-left:20px; }
+    .assumptions { margin-top:auto; font-size:13px; border-top:1px solid #ccc; padding-top:10px; color:#555; }
+    .quick-replies { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .quick-replies button {
+      padding:8px 12px; border:none; border-radius:20px; background:#e76f51; color:white; cursor:pointer;
+    }
+    .bot-funcs { margin-top:15px; }
+    .scorecard, .glossary { background:#f8f9fa; padding:10px; border-radius:8px; margin-top:10px; }
+    .scorecard h4, .glossary h4 { margin:5px 0; color:#2a9d8f; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>♻️ PackWise AI</h1>
+    <div class="tagline">Your intelligent assistant for packaging waste reduction & compliance</div>
+  </div>
+
+  <div class="container">
+    <div class="chat-area">
+      <div class="messages" id="messages">
+        <div class="message bot">👋 Hello! I’m PackWise AI. I can help you evaluate packaging footprint, recyclability, costs, and consumer perception. Try typing a question or use quick actions below!</div>
+      </div>
+
+      <div class="quick-replies">
+        <button onclick="quickMsg('Show footprint')">📦 Footprint</button>
+        <button onclick="quickMsg('Suggest alternative')">🔁 Alternatives</button>
+        <button onclick="quickMsg('Show report')">📑 Report</button>
+        <button onclick="quickMsg('Eco label')">🏷️ Eco Label</button>
+        <button onclick="quickMsg('Carbon impact')">🌍 Carbon</button>
+        <button onclick="showScorecard()">📊 Scorecard</button>
+      </div>
+
+      <div class="input-area">
+        <input type="text" id="userInput" placeholder="Type your message here..." />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <button class="plan-toggle" onclick="togglePlan()">View Agent Plan</button>
+      <div class="steps" id="planSteps">
+        <h4>Agent Workflow</h4>
+        <ol>
+          <li>Collect SKU + packaging metadata</li>
+          <li>Analyze material, recyclability, and cost</li>
+          <li>Generate supplier report & eco-label</li>
+          <li>Predict cost savings & carbon reduction</li>
+        </ol>
+      </div>
+
+      <div class="bot-funcs">
+        <div class="scorecard" id="scorecard" style="display:none;">
+          <h4>📊 Sustainability Scorecard</h4>
+          <ul>
+            <li>Weight per unit: 230g</li>
+            <li>Recycled content: 45%</li>
+            <li>Recyclability score: 7.5/10</li>
+            <li>Carbon reduction potential: 12%</li>
+          </ul>
+        </div>
+
+        <div class="glossary">
+          <h4>📘 Glossary</h4>
+          <p><b>rPET:</b> Recycled PET plastic used for sustainable bottles.</p>
+          <p><b>RFP:</b> Request for Proposal — sent to packaging suppliers.</p>
+          <p><b>Scope 3:</b> Indirect emissions across supply chain.</p>
+        </div>
+      </div>
+
+      <div class="assumptions">
+        <strong>Assumptions:</strong>
+        <ul>
+          <li>Data is simulated for demo</li>
+          <li>Cloud cost models use avg market data</li>
+          <li>No personal info stored</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePlan() {
+      const steps = document.getElementById('planSteps');
+      steps.style.display = (steps.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function showScorecard() {
+      const sc = document.getElementById('scorecard');
+      sc.style.display = (sc.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function quickMsg(text) {
+      document.getElementById('userInput').value = text;
+      sendMessage();
+    }
+
+    function sendMessage() {
+      const inputEl = document.getElementById('userInput');
+      const text = inputEl.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      inputEl.value = '';
+
+      setTimeout(() => {
+        const l = text.toLowerCase();
+        let reply = "Hmm, I’m not sure. Try asking about footprint, recyclability, or cost.";
+
+        if (l.includes('footprint') || l.includes('weight') || l.includes('mass')) {
+          reply = "Your product packaging weighs 230g with ~45% recyclability. You can save up to 20% volume by right-sizing.";
+        }
+        else if (l.includes('alternative') || l.includes('suggest') || l.includes('recommend')) {
+          reply = "Consider switching to 60% rPET + lightweight carton. Cost impact ±2%, saves $0.05/unit.";
+        }
+        else if (l.includes('rfp') || l.includes('supplier') || l.includes('report')) {
+          reply = "📄 Generated supplier RFP and sustainability disclosure. You can attach SKU data to auto-fill templates.";
+        }
+        else if (l.includes('recycle') || l.includes('recyclable')) {
+          reply = "This packaging is partly recyclable. Recommend mono-material upgrade to reach 85% recyclability.";
+        }
+        else if (l.includes('cost') || l.includes('saving')) {
+          reply = "Estimated packaging cost: $0.42/unit → $0.37/unit post-optimization. Annual saving: $60k (100k units/mo).";
+        }
+        else if (l.includes('eco') || l.includes('label')) {
+          reply = "🏷️ Eco Label: 'Made with 60% recycled content. Please recycle after use.' Expected 12% increase in buyer trust.";
+        }
+        else if (l.includes('carbon') || l.includes('emission')) {
+          reply = "Lifecycle carbon footprint reduced by 12%. Aligns with Science-Based Targets (SBTi).";
+        }
+        else if (l.includes('consumer') || l.includes('feedback')) {
+          reply = "Survey results: 73% consumers prefer visible eco-labels. Conversion lift: 8–12%.";
+        }
+        else if (l.includes('tip') || l.includes('idea')) {
+          reply = "💡 Try QR-enabled packaging for transparency & tracking post-consumer recycling.";
+        }
+
+        addMessage(reply, 'bot');
+      }, 800);
+    }
+
+    function addMessage(text, who) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message ' + who;
+      msgDiv.innerText = text;
+      document.getElementById('messages').appendChild(msgDiv);
+      const msgs = document.getElementById('messages');
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  </script>
+</body>
+</html>
